@@ -27,7 +27,7 @@ skills/
 pip install httpx
 
 # Strongly recommended — raises GitHub rate limit from 60/hr to 5000/hr
-export GITHUB_TOKEN=ghp_xxx   # create at https://github.com/settings/tokens (no scopes needed)
+export GITHUB_TOKEN= # create at https://github.com/settings/tokens (no scopes needed)
 ```
 
 ## Usage
