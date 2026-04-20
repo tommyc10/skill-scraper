@@ -1,0 +1,45 @@
+# Skills Manifest
+
+Scraped from: all
+
+- [`find-skills`](./find-skills/) — `vercel-labs/skills`
+- [`vercel-react-best-practices`](./vercel-react-best-practices/) — `vercel-labs/agent-skills`
+- [`frontend-design`](./frontend-design/) — `anthropics/skills`
+- [`web-design-guidelines`](./web-design-guidelines/) — `vercel-labs/agent-skills`
+- [`remotion-best-practices`](./remotion-best-practices/) — `remotion-dev/skills`
+- [`soultrace`](./soultrace/) — `soultrace-ai/soultrace-skill`
+- [`microsoft-foundry`](./microsoft-foundry-microsoft/) — `microsoft/azure-skills`
+- [`agent-browser`](./agent-browser/) — `vercel-labs/agent-browser`
+- [`azure-quotas`](./azure-quotas/) — `microsoft/azure-skills`
+- [`azure-upgrade`](./azure-upgrade/) — `microsoft/azure-skills`
+- [`skill-creator`](./skill-creator/) — `anthropics/skills`
+- [`azure-cost-optimization`](./azure-cost-optimization-microsoft/) — `microsoft/azure-skills`
+- [`azure-cost-optimization`](./azure-cost-optimization-microsoft/) — `microsoft/github-copilot-for-azure`
+- [`microsoft-foundry`](./microsoft-foundry-microsoft/) — `microsoft/github-copilot-for-azure`
+- [`vercel-composition-patterns`](./vercel-composition-patterns/) — `vercel-labs/agent-skills`
+- [`azure-messaging`](./azure-messaging/) — `microsoft/github-copilot-for-azure`
+- [`azure-enterprise-infra-planner`](./azure-enterprise-infra-planner/) — `microsoft/azure-skills`
+- [`ui-ux-pro-max`](./ui-ux-pro-max/) — `nextlevelbuilder/ui-ux-pro-max-skill`
+- [`azure-kubernetes`](./azure-kubernetes/) — `microsoft/azure-skills`
+- [`azure-hosted-copilot-sdk`](./azure-hosted-copilot-sdk/) — `microsoft/github-copilot-for-azure`
+- [`brainstorming`](./brainstorming/) — `obra/superpowers`
+- [`supabase-postgres-best-practices`](./supabase-postgres-best-practices/) — `supabase/agent-skills`
+- [`shadcn`](./shadcn/) — `shadcn/ui`
+- [`vercel-react-native-skills`](./vercel-react-native-skills/) — `vercel-labs/agent-skills`
+- [`seo-audit`](./seo-audit/) — `coreyhaines31/marketingskills`
+- [`simple`](./simple/) — `roin-orca/skills`
+- [`azure-cost`](./azure-cost/) — `microsoft/azure-skills`
+- [`pdf`](./pdf/) — `anthropics/skills`
+- [`azure-compute`](./azure-compute/) — `microsoft/github-copilot-for-azure`
+- [`audit`](./audit/) — `pbakaus/impeccable`
+- [`pptx`](./pptx/) — `anthropics/skills`
+- [`copywriting`](./copywriting/) — `coreyhaines31/marketingskills`
+- [`bolder`](./bolder/) — `pbakaus/impeccable`
+- [`browser-use`](./browser-use/) — `browser-use/browser-use`
+- [`next-best-practices`](./next-best-practices/) — `vercel-labs/next-skills`
+- [`using-superpowers`](./using-superpowers/) — `obra/superpowers`
+- [`lark-doc`](./lark-doc/) — `larksuite/cli`
+- [`lark-base`](./lark-base/) — `larksuite/cli`
+- [`lark-im`](./lark-im/) — `larksuite/cli`
+- [`systematic-debugging`](./systematic-debugging/) — `obra/superpowers`
+- [`lark-calendar`](./lark-calendar/) — `larksuite/cli`
