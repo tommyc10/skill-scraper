@@ -194,9 +194,9 @@ def main() -> int:
     parser.add_argument(
         "--leaderboard",
         nargs="+",
-        default=["hot"],
+        default=["all"],
         choices=["hot", "trending", "all"],
-        help="Which leaderboard(s) to scrape",
+        help="Which leaderboard(s) to scrape (default: all-time main page)",
     )
     parser.add_argument("--limit", type=int, default=50, help="Max skills to download")
     parser.add_argument("--output", default="skills", help="Output directory")
@@ -238,8 +238,15 @@ def main() -> int:
         successes = 0
         failures: list[tuple[str, str, str, str]] = []
 
+        # Detect duplicate skill slugs across different repos so we can disambiguate
+        slug_counts: dict[str, int] = {}
+        for _, _, s in skills:
+            slug_counts[s] = slug_counts.get(s, 0) + 1
+
         for i, (owner, repo, skill) in enumerate(skills, 1):
-            dest_name = f"{owner}__{repo}__{skill}"
+            # Use the skill slug as the folder name (matches skills.sh display).
+            # If two repos share a slug, disambiguate by appending the owner.
+            dest_name = skill if slug_counts[skill] == 1 else f"{skill}-{owner}"
             dest = OUTPUT_DIR / dest_name
             if dest.exists() and any(dest.iterdir()):
                 print(f"[{i}/{len(skills)}] SKIP (exists): {dest_name}")
@@ -283,7 +290,7 @@ def main() -> int:
             f.write("# Skills Manifest\n\n")
             f.write(f"Scraped from: {', '.join(args.leaderboard)}\n\n")
             for owner, repo, skill in skills:
-                dest_name = f"{owner}__{repo}__{skill}"
+                dest_name = skill if slug_counts[skill] == 1 else f"{skill}-{owner}"
                 if (OUTPUT_DIR / dest_name).exists():
                     f.write(f"- [`{skill}`](./{dest_name}/) — `{owner}/{repo}`\n")
         print(f"Manifest: {manifest}")
