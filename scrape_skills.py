@@ -199,6 +199,7 @@ def main() -> int:
         help="Which leaderboard(s) to scrape (default: all-time main page)",
     )
     parser.add_argument("--limit", type=int, default=50, help="Max skills to download")
+    parser.add_argument("--offset", type=int, default=0, help="Skip the first N skills (for paging, e.g. --offset 50 --limit 50 gets ranks 51-100)")
     parser.add_argument("--output", default="skills", help="Output directory")
     parser.add_argument("--dry-run", action="store_true", help="List but don't download")
     parser.add_argument("--sleep", type=float, default=0.1, help="Seconds between API calls")
@@ -226,8 +227,9 @@ def main() -> int:
                     seen.add(triple)
                     all_skills.append(triple)
 
-        skills = all_skills[: args.limit]
-        print(f"\nFound {len(all_skills)} unique skills; processing first {len(skills)}\n")
+        skills = all_skills[args.offset : args.offset + args.limit]
+        start, end = args.offset + 1, args.offset + len(skills)
+        print(f"\nFound {len(all_skills)} unique skills; processing ranks {start}-{end}\n")
 
         if args.dry_run:
             for owner, repo, skill in skills:
