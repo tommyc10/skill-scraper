@@ -1,61 +1,120 @@
-# skills-scraper
+# skill-cli
 
-Bulk-download agent skills from [skills.sh](https://skills.sh) into a local repo.
+`skill-cli` is an interactive command line tool for finding and installing project skills from the Vercel skill library.
 
-Each skill on skills.sh maps to a folder in a public GitHub repo (e.g. `anthropics/skills/frontend-design/` → `https://github.com/anthropics/skills/tree/main/frontend-design`). This script:
+The flow is intentionally simple:
 
-1. Parses the skills.sh leaderboard page(s) to get `owner/repo/skill-name` triples
-2. Uses the GitHub API to find each skill's folder
-3. Downloads every file in that folder (SKILL.md + any scripts, templates, etc.)
+1. Launch the CLI inside your project.
+2. Describe the project in plain English.
+3. GPT-5.4, Grok, or Gemini reads the bundled [SKILL.md](./src/skill_cli/skill-finder/SKILL.md).
+4. The model searches `skills.sh` for the best matches.
+5. The CLI shows recommended skills with short reasons.
+6. You approve the install.
+7. The tool creates `./skills/` in the current workspace and downloads the selected skills there.
 
-Output layout (flat, one folder per skill):
-
-```
-skills/
-  anthropics__skills__frontend-design/
-    SKILL.md
-    ...
-  vercel-labs__agent-skills__vercel-react-best-practices/
-    SKILL.md
-    ...
-  MANIFEST.md
-```
-
-## Setup
+## Install
 
 ```bash
-pip install httpx
+pip install -e .
+```
 
-# Strongly recommended — raises GitHub rate limit from 60/hr to 5000/hr
-export GITHUB_TOKEN= # create at https://github.com/settings/tokens (no scopes needed)
+Required environment variables:
+
+```bash
+export OPENAI_API_KEY=your_openai_api_key
+```
+
+If you want to use Grok instead of OpenAI:
+
+```bash
+export XAI_API_KEY=your_xai_api_key
+```
+
+If you want to use Google AI Studio / Gemini:
+
+```bash
+export GEMINI_API_KEY=your_google_ai_studio_key
+```
+
+Optional but strongly recommended for faster GitHub installs and higher rate limits:
+
+```bash
+export GITHUB_TOKEN=your_github_token
 ```
 
 ## Usage
 
+Interactive mode:
+
 ```bash
-# Top 50 hot skills
-python scrape_skills.py --leaderboard hot --limit 50
-
-# Top 200 across hot + trending, merged and deduped
-python scrape_skills.py --leaderboard hot trending --limit 200
-
-# See what would be downloaded without actually downloading
-python scrape_skills.py --leaderboard hot --limit 20 --dry-run
-
-# Custom output directory
-python scrape_skills.py --leaderboard hot --output my-skills
+skill-cli
 ```
 
-Re-running is safe — existing skill folders are skipped, so you can resume if you hit a rate limit.
+One-shot mode:
 
-## Notes on the approach
+```bash
+skill-cli "I'm building a React frontend with Azure. Keep the code simple and follow good habits."
+```
 
-- **Why GitHub API, not HTML scraping of skills.sh?** The leaderboard page only gives us the skill identifiers, not the content. Content lives on GitHub. Using the GitHub API means we get clean JSON, proper binary handling for any non-text files, and decent rate limits with a token.
-- **Why no `git clone`?** Most of these skills live inside large repos (e.g. `anthropics/skills` has dozens of skills). Cloning the whole repo just to grab one folder wastes bandwidth. The API lets us pull only the folder we want.
-- **Folder-finding fallback.** Most repos follow the pattern `repo-root/{skill-name}/SKILL.md`, but some nest under `/skills/` or put a single skill at the repo root. The script checks those common paths first, then falls back to GitHub code search for weird layouts.
+Using Grok:
 
-## Known limitations
+```bash
+skill-cli --provider grok "I'm building a React frontend with Azure. Keep the code simple and follow good habits."
+```
 
-- Code search (the fallback) is rate-limited separately at 30 req/min even with a token. If you're scraping a lot of weirdly-structured repos, you may need to add longer sleeps.
-- Private repos won't work with a token that lacks access — all the popular skills appear to be public though.
-- The leaderboard only shows the top 200 entries per view. To get more, you'd need to scrape skills.sh's paginated or search endpoints (not currently implemented here).
+Using Gemini:
+
+```bash
+skill-cli --provider gemini "I'm building a React frontend with Azure. Keep the code simple and follow good habits."
+```
+
+Example output:
+
+```text
+$ skill-cli
+Describe your project and the kinds of skills you want.
+> I'm building a React frontend with Azure. Keep the code simple and follow good habits.
+
+Recommended skills:
+1. vercel-react-best-practices (vercel-labs/agent-skills)
+   Matches the React frontend requirement and focuses on maintainable patterns.
+   https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices
+2. azure-ai (microsoft/agentics)
+   Covers Azure-specific project needs mentioned in the request.
+   https://skills.sh/microsoft/agentics/azure-ai
+
+Install these into ./skills? (y/n)
+```
+
+Useful flags:
+
+```bash
+skill-cli --top-k 3
+skill-cli --skills-dir .ai/skills
+skill-cli --project-dir /path/to/project
+skill-cli --yes "Find skills for a Next.js app with testing and clean code"
+skill-cli --provider grok
+skill-cli --provider grok --model grok-4.20-reasoning
+skill-cli --provider gemini
+skill-cli --provider gemini --model gemini-3-flash-preview
+```
+
+## What gets written
+
+After approval, the CLI writes:
+
+- `./skills/<skill-name>/...` with the downloaded skill files
+- `./skills/manifest.json` with the installed skill metadata
+
+Because the folder lives in the workspace, VS Code can see it immediately.
+
+## Project structure
+
+- [`src/skill_cli/cli.py`](./src/skill_cli/cli.py) runs the interactive CLI flow
+- [`src/skill_cli/skill-finder/SKILL.md`](./src/skill_cli/skill-finder/SKILL.md) is the bundled instruction file given to the model
+- [`src/skill_cli/recommender.py`](./src/skill_cli/recommender.py) asks the model to search the Vercel skill library
+- [`src/skill_cli/github_install.py`](./src/skill_cli/github_install.py) downloads the selected skill folders from GitHub
+
+## Legacy scraper
+
+The original bulk scraper still exists as [`scrape_skills.py`](./scrape_skills.py) if you want to download many skills directly from leaderboard pages.
