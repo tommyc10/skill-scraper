@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 
+from skill_cli import style
 from skill_cli.banner import print_banner
 from skill_cli.github_install import install_recommendations
 from skill_cli.project_context import build_project_context
@@ -55,7 +56,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     print_banner(args.model)
-
     validate_foundry_env(parser)
 
     project_dir = Path(args.project_dir).resolve()
@@ -66,10 +66,10 @@ def main(argv: list[str] | None = None) -> int:
     if not user_request:
         parser.error("A project description is required.")
 
-    print(f"Scanning project context in {project_dir}...")
+    style.status(f"Scanning project context in {project_dir}")
     project_context = build_project_context(project_dir)
 
-    print(f"Asking {args.model} on Foundry to search skills.sh...")
+    style.status(f"Asking {args.model} on Foundry to search skills.sh")
     recommender = SkillRecommender(model=args.model)
     try:
         recommendations = recommender.recommend(
@@ -78,29 +78,30 @@ def main(argv: list[str] | None = None) -> int:
             top_k=max(1, min(args.top_k, 5)),
         )
     except Exception as exc:
-        print(f"Failed to get recommendations: {exc}", file=sys.stderr)
+        style.error(f"Failed to get recommendations: {exc}")
         return 1
 
     if not recommendations:
-        print("No matching skills were found.")
+        style.error("No matching skills were found.")
         return 1
 
-    print()
-    print("Recommended skills:")
+    style.section(f"Recommended skills ({len(recommendations)})")
     for index, recommendation in enumerate(recommendations, start=1):
-        print(
-            f"{index}. {recommendation.skill_slug} "
-            f"({recommendation.owner}/{recommendation.repo})"
+        style.card(
+            index=index,
+            slug=recommendation.skill_slug,
+            repo=f"{recommendation.owner}/{recommendation.repo}",
+            reason=recommendation.reason,
+            url=recommendation.skill_url,
         )
-        print(f"   {recommendation.reason}")
-        print(f"   {recommendation.skill_url}")
 
-    if not args.yes and not confirm_install(args.skills_dir):
-        print("No files were written.")
+    if not args.yes and not style.confirm(f"Install these into ./{args.skills_dir} ?"):
+        print()
+        style.skipped("No files were written.")
         return 0
 
     print()
-    print(f"Installing skills into {project_dir / args.skills_dir}...")
+    style.status(f"Installing skills into {project_dir / args.skills_dir}")
     try:
         results = install_recommendations(
             recommendations=recommendations,
@@ -108,26 +109,23 @@ def main(argv: list[str] | None = None) -> int:
             skills_dir_name=args.skills_dir,
         )
     except Exception as exc:
-        print(f"Installation failed: {exc}", file=sys.stderr)
+        style.error(f"Installation failed: {exc}")
         return 1
 
-    print()
-    print("Install summary:")
+    style.section("Install summary")
     for result in results:
-        status = "skipped" if result.skipped else f"{result.file_count} files"
-        print(f"- {result.recommendation.skill_slug}: {status} -> {result.destination}")
-    print(f"Manifest: {project_dir / args.skills_dir / 'manifest.json'}")
+        slug = result.recommendation.skill_slug
+        if result.skipped:
+            style.skipped(f"{slug}  already installed")
+        else:
+            style.success(f"{slug}  {result.file_count} files  →  {result.destination}")
+    print()
+    style.status(f"Manifest: {project_dir / args.skills_dir / 'manifest.json'}")
     return 0
 
 
 def prompt_for_request() -> str:
-    print("Describe your project and the kinds of skills you want.")
-    return input("> ").strip()
-
-
-def confirm_install(skills_dir: str) -> bool:
-    reply = input(f"\nInstall these into ./{skills_dir}? (y/n) ").strip().lower()
-    return reply in {"y", "yes"}
+    return style.ask("What are you building?")
 
 
 def validate_foundry_env(parser: argparse.ArgumentParser) -> None:
