@@ -52,9 +52,17 @@ RECOMMENDATION_SCHEMA: dict[str, Any] = {
 
 
 class SkillRecommender:
-    def __init__(self, provider: str = "openai", model: str | None = None) -> None:
+    def __init__(
+        self,
+        provider: str = "openai",
+        model: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
+    ) -> None:
         self.provider = normalise_provider(provider)
         self.model = model or DEFAULT_MODELS[self.provider]
+        self.api_key = api_key
+        self.base_url = base_url
         self.instructions = resources.files("skill_cli").joinpath("skill-finder/SKILL.md").read_text()
 
     def recommend(
@@ -135,11 +143,14 @@ class SkillRecommender:
 
         if self.provider == "grok":
             return OpenAI(
-                api_key=_require_env("XAI_API_KEY"),
+                api_key=self.api_key or _require_env("XAI_API_KEY"),
                 base_url="https://api.x.ai/v1",
             )
 
-        return OpenAI(api_key=_require_env("OPENAI_API_KEY"))
+        return OpenAI(
+            api_key=self.api_key or get_openai_api_key(),
+            base_url=self.base_url or get_openai_base_url(),
+        )
 
     def _build_gemini_client(self):
         try:
@@ -226,6 +237,22 @@ def _require_env(name: str) -> str:
     if not value.strip():
         raise RuntimeError(f"{name} is not set.")
     return value
+
+
+def get_openai_api_key() -> str:
+    for name in ["SKILL_CLI_OPENAI_API_KEY", "OPENAI_API_KEY"]:
+        value = os.getenv(name)
+        if value and value.strip():
+            return value
+    raise RuntimeError("SKILL_CLI_OPENAI_API_KEY or OPENAI_API_KEY is not set.")
+
+
+def get_openai_base_url() -> str | None:
+    for name in ["SKILL_CLI_OPENAI_BASE_URL", "OPENAI_BASE_URL"]:
+        value = os.getenv(name)
+        if value and value.strip():
+            return value.strip()
+    return None
 
 
 def build_text_format(schema: dict[str, Any]) -> dict[str, Any]:

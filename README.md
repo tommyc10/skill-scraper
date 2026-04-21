@@ -24,6 +24,21 @@ Required environment variables:
 export OPENAI_API_KEY=your_openai_api_key
 ```
 
+If you're using an OpenAI-compatible endpoint instead of the default OpenAI API:
+
+```bash
+export SKILL_CLI_OPENAI_API_KEY=your_api_key
+export SKILL_CLI_OPENAI_BASE_URL=https://your-endpoint.example.com/v1
+```
+
+You can also pass them at runtime:
+
+```bash
+skill-cli --provider openai \
+  --openai-api-key your_api_key \
+  --openai-base-url https://your-endpoint.example.com/v1
+```
+
 If you want to use Grok instead of OpenAI:
 
 ```bash
@@ -97,6 +112,7 @@ skill-cli --provider grok
 skill-cli --provider grok --model grok-4.20-reasoning
 skill-cli --provider gemini
 skill-cli --provider gemini --model gemini-3-flash-preview
+skill-cli --provider openai --openai-base-url https://your-endpoint.example.com/v1
 ```
 
 ## What gets written

@@ -1,12 +1,15 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from skill_cli.recommender import (
     DEFAULT_MODELS,
     build_text_format,
+    get_openai_api_key,
+    get_openai_base_url,
     normalise_provider,
     normalise_recommendations,
     parse_skill_path,
@@ -36,6 +39,17 @@ class RecommenderTests(unittest.TestCase):
         self.assertEqual(text_format["name"], "skill_recommendations")
         self.assertTrue(text_format["strict"])
         self.assertEqual(text_format["schema"]["type"], "object")
+
+    def test_openai_helpers_prefer_skill_cli_specific_env_vars(self) -> None:
+        env = {
+            "SKILL_CLI_OPENAI_API_KEY": "skill-cli-key",
+            "OPENAI_API_KEY": "openai-key",
+            "SKILL_CLI_OPENAI_BASE_URL": "https://example.com/v1",
+            "OPENAI_BASE_URL": "https://api.openai.com/v1",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            self.assertEqual(get_openai_api_key(), "skill-cli-key")
+            self.assertEqual(get_openai_base_url(), "https://example.com/v1")
 
     def test_normalise_recommendations_backfills_from_url(self) -> None:
         payload = {
