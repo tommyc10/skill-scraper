@@ -4,7 +4,6 @@ from skill_cli import __version__
 from skill_cli.style import (
     ACCENT,
     BOLD,
-    DIM,
     MUTED,
     RESET,
     color,

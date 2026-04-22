@@ -25,15 +25,16 @@ source .venv/bin/activate          # macOS/Linux
 # 2. Install the CLI (editable mode so edits take effect immediately)
 pip install -e .
 
-# 3. Set Foundry credentials
-export FOUNDRY_API_KEY="your-key-here"
-export FOUNDRY_ENDPOINT="https://your-foundry-endpoint/v1"
-
-# 4. (Optional) GitHub token so the install step isn't rate-limited
-export GITHUB_TOKEN="ghp_..."
+# 3. Set Foundry credentials — copy the template and fill it in
+cp .env.example .env
+# then edit .env with your FOUNDRY_API_KEY, FOUNDRY_ENDPOINT, and deployment name
 ```
 
-To make the env vars permanent, add the `export` lines to `~/.zshrc` (macOS) or `$PROFILE` (Windows PowerShell).
+The CLI auto-loads `.env` at startup, so no `export`s or shell reloads are needed.
+`.env` is gitignored — your keys stay local.
+
+If you'd rather use shell exports (e.g. on CI), set the same variables the usual way:
+`FOUNDRY_API_KEY`, `FOUNDRY_ENDPOINT`, `SKILL_CLI_MODEL`, and optionally `GITHUB_TOKEN`.
 
 ## Usage
 

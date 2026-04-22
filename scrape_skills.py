@@ -96,7 +96,7 @@ def find_skill_folder(
         if not isinstance(items, list):
             continue
         if any(
-            it.get("type") == "file" and it.get("name", "").upper() == "SKILL.md".upper()
+            it.get("type") == "file" and it.get("name", "").upper() == "SKILL.MD"
             for it in items
         ):
             return path
