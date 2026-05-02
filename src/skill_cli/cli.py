@@ -36,7 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--model",
         default=os.getenv("SKILL_CLI_MODEL", DEFAULT_MODEL),
-        help=f"Model deployment name on Foundry (default: {DEFAULT_MODEL}).",
+        help=f"Anthropic model to use for reranking (default: {DEFAULT_MODEL}).",
     )
     parser.add_argument(
         "--top-k",
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     print_banner(args.model)
-    validate_foundry_env(parser)
+    validate_env(parser)
 
     project_dir = Path(args.project_dir).resolve()
     if not project_dir.exists():
@@ -71,9 +71,9 @@ def main(argv: list[str] | None = None) -> int:
     style.status(f"Scanning project context in {project_dir}")
     project_context = build_project_context(project_dir)
 
-    style.status(f"Asking {args.model} on Foundry to search skills.sh")
-    recommender = SkillRecommender(model=args.model)
+    style.status(f"Searching skill catalog and ranking with {args.model}")
     try:
+        recommender = SkillRecommender(model=args.model)
         recommendations = recommender.recommend(
             user_request=user_request,
             project_context=project_context,
@@ -130,7 +130,6 @@ def prompt_for_request() -> str:
     return style.ask("What are you building?")
 
 
-def validate_foundry_env(parser: argparse.ArgumentParser) -> None:
-    missing = [name for name in ("FOUNDRY_API_KEY", "FOUNDRY_ENDPOINT") if not os.getenv(name)]
-    if missing:
-        parser.error(f"Environment variable(s) not set: {', '.join(missing)}")
+def validate_env(parser: argparse.ArgumentParser) -> None:
+    if not os.getenv("ANTHROPIC_API_KEY", "").strip():
+        parser.error("ANTHROPIC_API_KEY is not set. Add it to your .env file or environment.")

@@ -37,7 +37,7 @@ def print_banner(model: str) -> None:
             print(line)
 
     tagline = "agent skills from skills.sh"
-    meta = f"{model} on foundry  {DOT}  v{__version__}"
+    meta = f"{model}  {DOT}  v{__version__}"
 
     print()
     print(
